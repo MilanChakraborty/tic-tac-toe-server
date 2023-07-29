@@ -1,0 +1,17 @@
+{
+  "name": "tic-tac-toe",
+  "version": "1.0.0",
+  "description": "Play cli tic tac toe",
+  "main": "play.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "node --test"
+  },
+  "author": "Gourab Porey",
+  "license": "ISC",
+  "dependencies": {
+    "table": "^6.8.1"
+  }
+}
