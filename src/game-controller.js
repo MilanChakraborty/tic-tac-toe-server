@@ -10,7 +10,7 @@ class GameController {
   start() {
     this.#IOController.render(this.#game.status());
 
-    this.#IOController.on('move-entered', (keyPressed) => {
+    this.#IOController.onMoveEntered((keyPressed) => {
       this.#game.consolidateMove(keyPressed);
 
       this.#IOController.render(this.#game.status());
@@ -20,7 +20,7 @@ class GameController {
       }
     });
 
-    this.#IOController.on('illegal-move-entered', (move) => {
+    this.#IOController.onIllegalMoveEntered(() => {
       this.#IOController.render(this.#game.status());
     });
 

@@ -3,22 +3,33 @@ const { Game } = require('./src/game');
 const { GameController } = require('./src/game-controller');
 const { Player } = require('./src/player');
 const { Players } = require('./src/players');
+const { SocketsController } = require('./src/sockets-controller');
 
 const SYMBOLS = ['O', 'X'];
 
 const keymap = {
-  q: ['move-entered', 0],
-  w: ['move-entered', 1],
-  e: ['move-entered', 2],
-  a: ['move-entered', 3],
-  s: ['move-entered', 4],
-  d: ['move-entered', 5],
-  z: ['move-entered', 6],
-  x: ['move-entered', 7],
-  c: ['move-entered', 8],
+  q: 0,
+  w: 1,
+  e: 2,
+  a: 3,
+  s: 4,
+  d: 5,
+  z: 6,
+  x: 7,
+  c: 8,
 };
 
-const conductGame = (players) => console.log(players);
+const conductGame = (clients) => {
+  const sockets = clients.map(({ client }) => client);
+  const playerObjects = clients.map(({ player }) => player);
+
+  const ioController = new SocketsController(sockets, keymap);
+  const players = new Players(...playerObjects);
+  const game = new Game(players);
+  const gameController = new GameController(game, ioController);
+
+  gameController.start();
+};
 
 const initiateGame = (clients) => {
   const players = [];
@@ -26,8 +37,8 @@ const initiateGame = (clients) => {
     client.socket.write('\nEnter your name: ');
 
     client.socket.once('data', (name) => {
-      const player = new Player(name, SYMBOLS[clientIndex]);
-      players.push({ client: clients[clientIndex], player });
+      const player = new Player(name.trim(), SYMBOLS[clientIndex]);
+      players.push({ client: clients[clientIndex].socket, player });
 
       const bothPlayerEnteredName = players.length === 2;
 
