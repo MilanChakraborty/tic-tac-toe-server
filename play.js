@@ -34,11 +34,11 @@ const conductGame = (clients) => {
 const initiateGame = (clients) => {
   const players = [];
   clients.forEach((client, clientIndex) => {
-    client.socket.write('\nEnter your name: ');
+    client.write('\nEnter your name: ');
 
-    client.socket.once('data', (name) => {
+    client.once('data', (name) => {
       const player = new Player(name.trim(), SYMBOLS[clientIndex]);
-      players.push({ client: clients[clientIndex].socket, player });
+      players.push({ client, player });
 
       const bothPlayerEnteredName = players.length === 2;
 
@@ -54,7 +54,7 @@ const main = () => {
 
   gameServer.on('connection', (socket) => {
     socket.setEncoding('utf-8');
-    clients.new.push({ socket });
+    clients.new.push(socket);
 
     if (clients.new.length === 2) {
       initiateGame(clients.new);
@@ -63,7 +63,7 @@ const main = () => {
       return;
     }
 
-    clients.new[0].socket.write('Waiting for Another Player\n');
+    clients.new[0].write('Waiting for Another Player\n');
   });
 };
 

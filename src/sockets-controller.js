@@ -66,14 +66,24 @@ class SocketsController {
     this.#displayWaitingMsg(currentPlayerName);
   }
 
+  #onPlayerQuit(socket) {
+    const opponentPLayerSocket =
+      this.#sockets[(this.#currentSocketIndex + 1) % 2];
+    socket.write(`You Quited The Game, Opponent Wins\n`);
+    opponentPLayerSocket.write('Opponent Left the Game, You Won\n');
+
+    opponentPLayerSocket.end();
+    socket.end();
+  }
+
   #sendDataToGame(data, socket) {
     switch (true) {
       case FORCE_QUIT_SEQUENCES.includes(data):
-        socket.end();
+        this.#onPlayerQuit(socket);
         break;
       case this.#keymap[data] === undefined:
         this.#onIllegalMove();
-        socket.write(`${data} move is illegal`);
+        socket.write(`${data} move is illegal\n`);
         break;
       default:
         this.#currentSocketIndex = (this.#currentSocketIndex + 1) % 2;
