@@ -7,11 +7,15 @@
     "test": "test"
   },
   "scripts": {
-    "test": "node --test"
+    "test": "node --test",
+    "lint": "npx eslint ."
   },
   "author": "Gourab Porey",
   "license": "ISC",
   "dependencies": {
     "table": "^6.8.1"
+  },
+  "devDependencies": {
+    "eslint": "^8.46.0"
   }
 }

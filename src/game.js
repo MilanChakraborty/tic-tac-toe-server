@@ -34,7 +34,7 @@ class Game {
       currentPlayerName: this.#players.currentPlayerName,
       winner: this.#winner,
       isOver: this.#isOver,
-    }
+    };
   }
 }
 

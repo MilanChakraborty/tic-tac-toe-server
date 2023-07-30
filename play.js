@@ -1,9 +1,8 @@
-const { Game } = require("./src/game");
-const { GameController } = require("./src/game-controller");
-const { GameRenderer } = require("./src/game-renderer");
-const { KeyboardController } = require("./src/keyboard-controller");
-const { Player } = require("./src/player");
-const { Players } = require("./src/players");
+const net = require('node:net');
+const { Game } = require('./src/game');
+const { GameController } = require('./src/game-controller');
+const { Player } = require('./src/player');
+const { Players } = require('./src/players');
 
 const SYMBOLS = ['O', 'X'];
 
@@ -19,22 +18,42 @@ const keymap = {
   c: ['move-entered', 8],
 };
 
+const conductGame = (players) => console.log(players);
+
+const initiateGame = (clients) => {
+  const players = [];
+  clients.forEach((client, clientIndex) => {
+    client.socket.write('\nEnter your name: ');
+
+    client.socket.once('data', (name) => {
+      const player = new Player(name, SYMBOLS[clientIndex]);
+      players.push({ client: clients[clientIndex], player });
+
+      const bothPlayerEnteredName = players.length === 2;
+
+      if (bothPlayerEnteredName) conductGame(players);
+    });
+  });
+};
+
 const main = () => {
-  const player1Name = process.argv[2];
-  const player2Name = process.argv[3];
+  const gameServer = net.createServer();
+  gameServer.listen(8000, () => console.log('Tic Tac Toe Server is Live'));
+  const clients = { old: [], new: [] };
 
-  const player1 = new Player(player1Name, SYMBOLS[0]);
-  const player2 = new Player(player2Name, SYMBOLS[1]);
+  gameServer.on('connection', (socket) => {
+    socket.setEncoding('utf-8');
+    clients.new.push({ socket });
 
-  const players = new Players(player1, player2);
+    if (clients.new.length === 2) {
+      initiateGame(clients.new);
+      clients.old.push(...clients.new);
+      clients.new = [];
+      return;
+    }
 
-  const game = new Game(players);
-
-  const inputController = new KeyboardController(process, keymap);
-  const renderer = new GameRenderer();
-
-  const gameController = new GameController(game, inputController, renderer);
-  gameController.start();
-}
+    clients.new[0].socket.write('Waiting for Another Player\n');
+  });
+};
 
 main();

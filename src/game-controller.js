@@ -1,29 +1,30 @@
 class GameController {
   #game;
-  #inputController;
+  #IOController;
 
   constructor(game, IOController) {
     this.#game = game;
-    this.#inputController = IOController;
+    this.#IOController = IOController;
   }
 
   start() {
-    this.#renderer.render(this.#game.status());
+    this.#IOController.render(this.#game.status());
 
-    this.#inputController.on('move-entered', (keyPressed) => {
+    this.#IOController.on('move-entered', (keyPressed) => {
       this.#game.consolidateMove(keyPressed);
-      this.#renderer.render(this.#game.status());
+
+      this.#IOController.render(this.#game.status());
+
       if (this.#game.status().isOver) {
-        this.#inputController.stop();
+        this.#IOController.stop();
       }
     });
 
-    this.#inputController.on('illegal-move-entered', (move) => {
-      this.#renderer.render(this.#game.status());
-      console.log('Illegal Move', move);
+    this.#IOController.on('illegal-move-entered', (move) => {
+      this.#IOController.render(this.#game.status());
     });
 
-    this.#inputController.start();
+    this.#IOController.start();
   }
 }
 
