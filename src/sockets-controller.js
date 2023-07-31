@@ -21,6 +21,18 @@ class SocketsController {
     this.#onIllegalMove = repromptPlayer;
   }
 
+  #currentPlayerSocket() {
+    return this.#sockets[this.#currentSocketIndex];
+  }
+
+  #nextPlayerSocket() {
+    return this.#sockets[(this.#currentSocketIndex + 1) % 2];
+  }
+
+  #swapPlayerSockets() {
+    this.#currentSocketIndex = (this.#currentSocketIndex + 1) % 2;
+  }
+
   #generateBoard(moves) {
     let board = '\x1Bc';
 
@@ -33,12 +45,12 @@ class SocketsController {
   }
 
   #promptNextPlayer(name) {
-    const socket = this.#sockets[this.#currentSocketIndex];
+    const socket = this.#currentPlayerSocket();
     socket.write(`Enter your move: ${name}\n`);
   }
 
   #displayWaitingMsg(name) {
-    const socket = this.#sockets[(this.#currentSocketIndex + 1) % 2];
+    const socket = this.#nextPlayerSocket();
     socket.write(`Its ${name}'s Move\n`);
   }
 
@@ -67,13 +79,12 @@ class SocketsController {
   }
 
   #onPlayerQuit(socket) {
-    const opponentPLayerSocket =
-      this.#sockets[(this.#currentSocketIndex + 1) % 2];
+    const nextPLayerSocket = this.#nextPlayerSocket();
     socket.write(`You Quited The Game, Opponent Wins\n`);
-    opponentPLayerSocket.write('Opponent Left the Game, You Won\n');
+    nextPLayerSocket.write('Opponent Left the Game, You Won\n');
 
-    opponentPLayerSocket.end();
     socket.end();
+    nextPLayerSocket.end();
   }
 
   #sendDataToGame(data, socket) {
@@ -86,7 +97,7 @@ class SocketsController {
         socket.write(`${data} move is illegal\n`);
         break;
       default:
-        this.#currentSocketIndex = (this.#currentSocketIndex + 1) % 2;
+        this.#swapPlayerSockets();
         this.#onLegalMove(this.#keymap[data]);
     }
   }
